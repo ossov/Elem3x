@@ -1,23 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Element 3xpert</title>
+  <title>LLM CSS Tool</title>
   <style>
-    body { width: 300px; font-family: sans-serif; background-color: white; }
+    body { 
+      position: relative; 
+      width: 330px; 
+      font-family: sans-serif; 
+      background-color: white;
+      padding: 10px;
+      font-size: 14px;
+    }
+    h3, h4 { margin-top: 0; margin-bottom: 5px; }
+    pre, div#selector { 
+      background-color: #f0f0f0; 
+      padding: 5px; 
+      font-size: 12px; 
+      word-wrap: break-word; 
+      white-space: pre-wrap;
+      border-radius: 4px;
+      margin-top: 0;
+    }
     #closeBtn { position: absolute; top: 5px; right: 8px; border: none; background: none; font-size: 20px; cursor: pointer; }
-    #selector { font-family: monospace; background-color: #eee; padding: 5px; font-size: 12px; word-wrap: break-word; }
-    textarea { width: 95%; margin-top: 10px; }
-    button { margin-top: 10px; }
+    hr { margin: 15px 0; border: none; border-top: 1px solid #eee; }
   </style>
 </head>
 <body>
+  <button id="closeBtn">&times;</button>
   <h3>Selected Element:</h3>
   <div id="selector">Click an element on the page.</div>
+
   <h4>Current Styles:</h4>
   <pre id="styles"></pre>
-  <textarea id="command" placeholder="e.g., make the font bold and red"></textarea>
-  <button id="generateBtn">Generate CSS</button>
+
+  <hr>
+  <h4>Editing Tools:</h4>
+  <div>
+    <label for="colorPicker">Text Color:</label>
+    <input type="color" id="colorPicker">
+  </div>
+
+  <div style="margin-top: 10px;">
+  <label for="fontSizeSlider">Font Size:</label>
+  <input type="range" id="fontSizeSlider" min="8" max="100" value="16">
+  <span id="fontSizeValue">16px</span>
+  </div>
+
+  <div style="margin-top: 10px;">
+  <label for="fontWeightSlider">Font Weight:</label>
+  <input type="range" id="fontWeightSlider" min="100" max="900" step="100" value="400">
+  <span id="fontWeightValue">400</span>
+  <button id="boldBtn" style="margin-left: 10px; padding: 2px 6px;">Bold</button>
+  </div>
+
+  <div style="margin-top: 10px;">
+  <label for="borderRadiusSlider">Border Radius:</label>
+  <input type="range" id="borderRadiusSlider" min="0" max="50" value="0">
+  <span id="borderRadiusValue">0px</span>
+  </div>
+
+  <hr>
+
+  <h4>Final CSS:</h4>
   <pre id="result"></pre>
+  
   <script src="popup.js"></script>
 </body>
 </html>

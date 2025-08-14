@@ -3,92 +3,137 @@
 // --- Get UI elements ---
 const selectorDiv = document.getElementById('selector');
 const stylesPre = document.getElementById('styles');
-const generateBtn = document.getElementById('generateBtn');
-const commandInput = document.getElementById('command'); // This line was likely missing
 const resultPre = document.getElementById('result');
 const closeBtn = document.getElementById('closeBtn');
+const colorPicker = document.getElementById('colorPicker');
+const fontSizeSlider = document.getElementById('fontSizeSlider');
+const fontSizeValue = document.getElementById('fontSizeValue');
+const fontWeightSlider = document.getElementById('fontWeightSlider');
+const fontWeightValue = document.getElementById('fontWeightValue');
+const boldBtn = document.getElementById('boldBtn');
+// --- Get the new border-radius elements ---
+const borderRadiusSlider = document.getElementById('borderRadiusSlider');
+const borderRadiusValue = document.getElementById('borderRadiusValue');
 
-// State variable to hold the latest element data
+
+// --- State variables ---
 let currentData = null;
+let activeStyles = {};
 
 // --- DATA HANDLING ---
+function updatePanel(data) {
+  currentData = data;
+  if (data) {
+    selectorDiv.textContent = data.selector;
+    stylesPre.textContent = JSON.stringify(data.styles, null, 2);
 
-// 1. Request initial data when the panel opens
-chrome.runtime.sendMessage({ type: "getSelector" }, (response) => {
-  if (response && response.data) {
-    currentData = response.data;
-    selectorDiv.textContent = response.data.selector;
-    stylesPre.textContent = JSON.stringify(currentData.styles, null, 2);
+    // Set Text Color
+    const currentColor = data.styles['color'];
+    colorPicker.value = rgbToHex(currentColor);
+
+    // Set Font Size
+    const currentSize = parseInt(data.styles['font-size']) || 16;
+    fontSizeSlider.value = currentSize;
+    fontSizeValue.textContent = `${currentSize}px`;
+
+    // Set Font Weight
+    let currentWeight = data.styles['font-weight'];
+    if (currentWeight === 'bold') { currentWeight = '700'; } 
+    else if (currentWeight === 'normal') { currentWeight = '400'; }
+    fontWeightSlider.value = currentWeight;
+    fontWeightValue.textContent = currentWeight;
+
+    // --- NEW: Set Border Radius ---
+    const currentRadius = parseInt(data.styles['border-radius']) || 0;
+    borderRadiusSlider.value = currentRadius;
+    borderRadiusValue.textContent = `${currentRadius}px`;
+
   } else {
     selectorDiv.textContent = "Click an element on the page.";
     stylesPre.textContent = "";
   }
+}
+
+chrome.runtime.sendMessage({ type: "getSelector" }, (response) => {
+  if (response) { updatePanel(response.data); }
 });
 
-// 2. Listen for live updates when a new element is clicked or unlocked
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "selectorUpdated") {
-    currentData = message.data;
-    if (currentData) {
-      selectorDiv.textContent = currentData.selector;
-      stylesPre.textContent = JSON.stringify(currentData.styles, null, 2);
-    } else {
-      selectorDiv.textContent = "Click an element on the page.";
-      stylesPre.textContent = "";
-    }
+    activeStyles = {};
+    resultPre.textContent = "";
+    updatePanel(message.data);
   }
 });
 
-// --- EVENT LISTENERS ---
-
-// Generate CSS when the button is clicked
-generateBtn.addEventListener('click', () => {
-  const command = commandInput.value;
-
-  if (currentData && command) {
-    const stylesString = JSON.stringify(currentData.styles, null, 2);
-    const prompt = `
-You are an expert CSS code generator.
-Generate a CSS rule based on the user's request, taking the element's current styles into account for context.
-Only output the final CSS code block. Do not include any explanation.
-
-Selector: "${currentData.selector}"
-Current Styles:
-${stylesString}
-
-User Request: "${command}"
-`;
-    resultPre.textContent = "Generating...\n" + prompt;
-    
-    const API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-    const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
-    const url = `${API_ENDPOINT}?key=${API_KEY}`;
-
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        "contents": [{"parts": [{"text": prompt}]}]
-      })
-    })
-    .then(response => {
-      if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
-      return response.json();
-    })
-    .then(data => {
-      const generatedCss = data.candidates[0].content.parts[0].text;
-      const cleanedCss = generatedCss.replace(/```css\n?|```/g, "").trim();
-      resultPre.textContent = cleanedCss;
-      chrome.runtime.sendMessage({ type: "injectCss", css: cleanedCss });
-    })
-    .catch(error => {
-      console.error("Error calling Google AI API:", error);
-      resultPre.textContent = "Error: Could not generate CSS. Check the console.";
-    });
-  }
+// --- GUI EVENT LISTENERS ---
+colorPicker.addEventListener('input', (e) => {
+  if (!currentData) return;
+  const newColor = e.target.value;
+  activeStyles['color'] = newColor;
+  const fullCss = generateFinalCss();
+  if (fullCss) { window.parent.postMessage({ type: "injectCss", css: fullCss }, "*"); }
 });
 
-// Close the panel when the 'X' is clicked
+fontSizeSlider.addEventListener('input', (e) => {
+  if (!currentData) return;
+  const newSize = e.target.value;
+  const newFontSize = `${newSize}px`;
+  fontSizeValue.textContent = newFontSize;
+  activeStyles['font-size'] = newFontSize;
+  const fullCss = generateFinalCss();
+  if (fullCss) { window.parent.postMessage({ type: "injectCss", css: fullCss }, "*"); }
+});
+
+fontWeightSlider.addEventListener('input', (e) => {
+  if (!currentData) return;
+  const newWeight = e.target.value;
+  fontWeightValue.textContent = newWeight;
+  activeStyles['font-weight'] = newWeight;
+  const fullCss = generateFinalCss();
+  if (fullCss) { window.parent.postMessage({ type: "injectCss", css: fullCss }, "*"); }
+});
+
+boldBtn.addEventListener('click', () => {
+  if (!currentData) return;
+  fontWeightSlider.value = 700;
+  fontWeightSlider.dispatchEvent(new Event('input'));
+});
+
+// --- NEW: Add listener for the border-radius slider ---
+borderRadiusSlider.addEventListener('input', (e) => {
+  if (!currentData) return;
+  const newRadius = e.target.value;
+  const newBorderRadius = `${newRadius}px`;
+  borderRadiusValue.textContent = newBorderRadius;
+  activeStyles['border-radius'] = newBorderRadius;
+  const fullCss = generateFinalCss();
+  if (fullCss) { window.parent.postMessage({ type: "injectCss", css: fullCss }, "*"); }
+});
+
+
+// --- HELPER FUNCTIONS ---
+function generateFinalCss() {
+  if (!currentData || Object.keys(activeStyles).length === 0) {
+    resultPre.textContent = "";
+    return "";
+  }
+  let cssText = `${currentData.selector} {\n`;
+  for (const property in activeStyles) {
+    cssText += `  ${property}: ${activeStyles[property]};\n`;
+  }
+  cssText += `}`;
+  resultPre.textContent = cssText;
+  return cssText;
+}
+
+function rgbToHex(rgb) {
+  if (!rgb || !rgb.startsWith('rgb')) return '#000000';
+  const [r, g, b] = rgb.match(/\d+/g).map(Number);
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// --- Close Button Listener ---
 closeBtn.addEventListener('click', () => {
   chrome.runtime.sendMessage({ type: "closePanel" });
 });
