@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Element 3xpert</title>
+  <style>
+    body { width: 300px; font-family: sans-serif; background-color: white; }
+    #closeBtn { position: absolute; top: 5px; right: 8px; border: none; background: none; font-size: 20px; cursor: pointer; }
+    #selector { font-family: monospace; background-color: #eee; padding: 5px; font-size: 12px; word-wrap: break-word; }
+    textarea { width: 95%; margin-top: 10px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h3>Selected Element:</h3>
+  <div id="selector">Click an element on the page.</div>
+  <h4>Current Styles:</h4>
+  <pre id="styles"></pre>
+  <textarea id="command" placeholder="e.g., make the font bold and red"></textarea>
+  <button id="generateBtn">Generate CSS</button>
+  <pre id="result"></pre>
+  <script src="popup.js"></script>
+</body>
+</html>

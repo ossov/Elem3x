@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Element 3xpert",
+  "version": "0.1",
+  "description": "A tool to visually select elements and generate styles.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "popup.html", "popup.js" ],
+      "matches": [ "<all_urls>" ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["styles.css"],
+      "js": ["content.js"]
+    }
+  ]
+}
