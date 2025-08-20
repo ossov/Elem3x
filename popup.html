@@ -28,38 +28,61 @@
 <body>
   <button id="closeBtn">&times;</button>
   <h3>Selected Element:</h3>
-  <div id="selector">Click an element on the page.</div>
+  <div id="selector-options">Click an element on the page.</div>
 
   <h4>Current Styles:</h4>
   <pre id="styles"></pre>
 
   <hr>
-  <h4>Editing Tools:</h4>
-  <div>
-    <label for="colorPicker">Text Color:</label>
-    <input type="color" id="colorPicker">
-  </div>
+    <h4>Editing Tools:</h4>
 
-  <div style="margin-top: 10px;">
-  <label for="fontSizeSlider">Font Size:</label>
-  <input type="range" id="fontSizeSlider" min="8" max="100" value="16">
-  <span id="fontSizeValue">16px</span>
-  </div>
+    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+    <label for="selectorToggle" style="margin-right: 10px;">Element Selector:</label>
+    <label class="switch">
+        <input type="checkbox" id="selectorToggle" checked>
+        <span class="slider"></span>
+    </label>
+    </div>
 
-  <div style="margin-top: 10px;">
-  <label for="fontWeightSlider">Font Weight:</label>
-  <input type="range" id="fontWeightSlider" min="100" max="900" step="100" value="400">
-  <span id="fontWeightValue">400</span>
-  <button id="boldBtn" style="margin-left: 10px; padding: 2px 6px;">Bold</button>
-  </div>
+    <style>
+    /* ... your existing styles ... */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #007bff; }
+    input:checked + .slider:before { transform: translateX(20px); }
+    </style>
 
-  <div style="margin-top: 10px;">
-  <label for="borderRadiusSlider">Border Radius:</label>
-  <input type="range" id="borderRadiusSlider" min="0" max="50" value="0">
-  <span id="borderRadiusValue">0px</span>
-  </div>
+    <div id="textControls">
+    <div>
+        <label for="colorPicker">Text Color:</label>
+        <input type="color" id="colorPicker">
+    </div>
 
-  <hr>
+    <div style="margin-top: 10px;">
+        <label for="fontSizeSlider">Font Size:</label>
+        <input type="range" id="fontSizeSlider" min="8" max="100" value="16">
+        <span id="fontSizeValue">16px</span>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <label for="fontWeightSlider">Font Weight:</label>
+        <input type="range" id="fontWeightSlider" min="100" max="900" step="100" value="400">
+        <span id="fontWeightValue">400</span>
+        <button id="boldBtn" style="margin-left: 10px; padding: 2px 6px;">Bold</button>
+    </div>
+    </div>
+
+    <div id="buttonControls">
+    <div style="margin-top: 10px;">
+        <label for="borderRadiusSlider">Border Radius:</label>
+        <input type="range" id="borderRadiusSlider" min="0" max="50" value="0">
+        <span id="borderRadiusValue">0px</span>
+    </div>
+    </div>
+
+    <hr>
 
   <h4>Final CSS:</h4>
   <pre id="result"></pre>
